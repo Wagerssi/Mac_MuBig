@@ -1,0 +1,67 @@
+name: Mac_MuBig_UI v2.4 빌드
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Python 설치
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 패키지 설치
+        run: |
+          pip install --upgrade pip
+          pip install pyinstaller pyside6 requests
+
+      - name: macOS 앱 빌드
+        run: |
+          pyinstaller \
+            --noconfirm \
+            --onefile \
+            --windowed \
+            --name "Mac_MuBig_UI v2.4" \
+            --icon "asset/logo/Mubig.icns" \
+            --add-data "asset:asset" \
+            --add-data "MuBig_config.json:." \
+            --hidden-import "PySide6.QtCore" \
+            --hidden-import "PySide6.QtGui" \
+            --hidden-import "PySide6.QtWidgets" \
+            --hidden-import "PySide6.QtNetwork" \
+            --hidden-import "requests" \
+            --hidden-import "src" \
+            --hidden-import "src.auth" \
+            --hidden-import "src.installer" \
+            --hidden-import "src.settings" \
+            --hidden-import "src.ui" \
+            --hidden-import "src.ui.main_window" \
+            --hidden-import "src.ui.install_tab" \
+            --hidden-import "src.ui.settings_tab" \
+            --hidden-import "src.ui.custom_widgets" \
+            --hidden-import "src.ui.styles" \
+            --hidden-import "src.ui.wtf_file_dialog" \
+            --hidden-import "src.utils" \
+            --hidden-import "src.utils.file_handler" \
+            --hidden-import "src.utils.game_paths" \
+            main.py
+
+      - name: 결과물 압축
+        run: |
+          cd dist
+          zip -r "Mac_MuBig_UI_v2.4.zip" "Mac_MuBig_UI v2.4"
+
+      - name: Artifact 업로드
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mac_MuBig_UI_v2.4
+          path: dist/Mac_MuBig_UI_v2.4.zip
+          retention-days: 90
