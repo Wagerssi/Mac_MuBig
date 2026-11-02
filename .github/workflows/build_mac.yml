@@ -2,32 +2,36 @@ name: Mac_MuBig_UI v2.4 빌드
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches: [ main ]          # main 브랜치에 push 할 때마다 자동 빌드
+  workflow_dispatch:             # GitHub 웹사이트에서 수동 실행 버튼
 
 jobs:
   build-macos:
-    runs-on: macos-latest
+    runs-on: macos-latest        # GitHub 의 무료 macOS 서버 사용
 
     steps:
+      # 1. 저장소 코드 내려받기
       - name: 코드 체크아웃
         uses: actions/checkout@v4
 
+      # 2. Python 3.11 설치
       - name: Python 설치
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+      # 3. 필요 패키지 설치
       - name: 패키지 설치
         run: |
           pip install --upgrade pip
           pip install pyinstaller pyside6 requests
 
+      # 4. pyinstaller 로 macOS 앱 빌드 (--onedir → .app 번들 생성)
       - name: macOS 앱 빌드
         run: |
           pyinstaller \
             --noconfirm \
-            --onefile \
+            --onedir \
             --windowed \
             --name "Mac_MuBig_UI v2.4" \
             --icon "asset/logo/Mubig.icns" \
@@ -54,11 +58,13 @@ jobs:
             --hidden-import "src.utils.game_paths" \
             main.py
 
+      # 5. 결과물 압축 (.app 번들째로 압축)
       - name: 결과물 압축
         run: |
           cd dist
-          zip -r "Mac_MuBig_UI_v2.4.zip" "Mac_MuBig_UI v2.4"
+          zip -r "Mac_MuBig_UI_v2.4.zip" "Mac_MuBig_UI v2.4.app"
 
+      # 6. 다운로드 가능하도록 업로드 (90일 보관)
       - name: Artifact 업로드
         uses: actions/upload-artifact@v4
         with:
