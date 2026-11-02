@@ -28,7 +28,7 @@ echo ""
 echo "앱 빌드 중..."
 pyinstaller \
     --noconfirm \
-    --onefile \
+    --onedir \
     --windowed \
     --name "Mac_MuBig_UI v2.4" \
     --icon "asset/logo/Mubig.icns" \
@@ -58,10 +58,13 @@ pyinstaller \
 if [ $? -eq 0 ]; then
     echo ""
     echo "=== 빌드 성공 ==="
-    echo "결과물: dist/Mac_MuBig_UI v2.4"
+    echo "결과물: dist/Mac_MuBig_UI v2.4.app"
+    echo ""
+    echo "압축하려면:"
+    echo "   cd dist && zip -r 'Mac_MuBig_UI_v2.4.zip' 'Mac_MuBig_UI v2.4.app'"
     echo ""
     echo "※ macOS Gatekeeper 서명 없이 배포할 경우 사용자가 아래 명령 실행 필요:"
-    echo "   xattr -cr \"/Applications/Mac_MuBig_UI v2.4\""
+    echo "   xattr -cr \"/Applications/Mac_MuBig_UI v2.4.app\""
 else
     echo ""
     echo "=== 빌드 실패 ==="

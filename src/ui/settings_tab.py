@@ -432,13 +432,16 @@ class SettingsTab(QWidget):
         QMessageBox.warning(self, '잘못된 경로', '선택한 폴더가 게임 경로의 하위가 아닙니다.')
 
     def add_backup_file(self):
-        valid_paths = {k: self.settings.get_game_path(k) for k in VERSION_ORDER
-                       if self.settings.get_game_path(k) and Path(self.settings.get_game_path(k)).exists()}
-        if not valid_paths:
+        version = self.settings.get_selected_version()
+        # 경로 존재 여부와 무관하게 설정된 경로 우선 사용 (macOS 호환)
+        all_paths = {k: self.settings.get_game_path(k) for k in VERSION_ORDER
+                     if self.settings.get_game_path(k)}
+        valid_paths = {k: p for k, p in all_paths.items() if Path(p).exists()}
+        usable_paths = valid_paths if valid_paths else all_paths
+        if not usable_paths:
             QMessageBox.warning(self, '경고', '먼저 게임 경로를 하나 이상 설정해 주세요.')
             return
-        version = self.settings.get_selected_version()
-        gp = valid_paths.get(version, list(valid_paths.values())[0])
+        gp = usable_paths.get(version, list(usable_paths.values())[0])
         base = Path(gp)
         main_names = [e['main'] for e in self._account_names]
         acct = main_names[0] if main_names else '계정명'
@@ -449,21 +452,30 @@ class SettingsTab(QWidget):
             'Lua Files (*.lua);;Text Files (*.txt);;WTF Files (*.wtf);;All Files (*.*)'
         )
         for file in files:
-            fp = Path(file)
-            for key, p in valid_paths.items():
+            fp = Path(file).resolve()
+            matched = False
+            for key, p in usable_paths.items():
                 try:
-                    rel = fp.relative_to(Path(p))
+                    rel = fp.relative_to(Path(p).resolve())
                     vname = self.settings.get_game_version_name(key)
                     s = f'[{vname}][파일] {str(rel).replace(os.sep, "/")}'
                     for i in range(self.backup_list.count()):
                         if self.backup_list.item(i).text() == s:
+                            matched = True
                             break
-                    else:
+                    if not matched:
                         self.backup_list.addItem(s)
                         self._autosave()
+                    matched = True
                     break
                 except ValueError:
                     pass
+            if not matched:
+                # 게임 경로 하위가 아니어도 현재 버전 기준으로 추가 허용
+                vname = self.settings.get_game_version_name(version)
+                s = f'[{vname}][파일] {fp.name}'
+                self.backup_list.addItem(s)
+                self._autosave()
 
     def remove_selected_items(self):
         for item in self.backup_list.selectedItems():
