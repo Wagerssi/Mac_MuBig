@@ -1,0 +1,28 @@
+{
+  "auth": {
+    "is_authenticated": false,
+    "auth_url": "",
+    "cached_auth": null
+  },
+  "game_versions": {
+    "retail": {
+      "name": "retail",
+      "path": ""
+    },
+    "classic": {
+      "name": "classic",
+      "path": ""
+    },
+    "classic_era": {
+      "name": "Classic_era",
+      "path": ""
+    }
+  },
+  "selected_version": "retail",
+  "account_name": "",
+  "backup_items": {
+    "retail": {"folders": [], "files": []},
+    "classic": {"folders": [], "files": []},
+    "classic_era": {"folders": [], "files": []}
+  }
+}
